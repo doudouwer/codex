@@ -259,7 +259,18 @@ fn strip_fenced_code_blocks(message: &str) -> String {
             visible_lines.push(line);
         }
     }
-    visible_lines.join("\n").trim().to_string()
+    let mut compacted_lines = Vec::new();
+    for line in visible_lines {
+        let is_blank = line.trim().is_empty();
+        let previous_is_blank = compacted_lines
+            .last()
+            .is_some_and(|previous: &&str| previous.trim().is_empty());
+        if is_blank && previous_is_blank {
+            continue;
+        }
+        compacted_lines.push(line);
+    }
+    compacted_lines.join("\n").trim().to_string()
 }
 
 fn derive_requirement_status(
