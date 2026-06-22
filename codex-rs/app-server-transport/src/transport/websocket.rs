@@ -7,6 +7,7 @@ use super::auth::is_unauthenticated_non_loopback_listener;
 use super::forward_incoming_message;
 use super::next_connection_id;
 use super::serialize_outgoing_message;
+use super::web_client::requirement_page;
 use crate::outgoing_message::ConnectionId;
 use crate::outgoing_message::QueuedOutgoingMessage;
 use axum::Router;
@@ -19,6 +20,7 @@ use axum::extract::ws::WebSocketUpgrade;
 use axum::http::HeaderMap;
 use axum::http::Request;
 use axum::http::StatusCode;
+use axum::http::header::HOST;
 use axum::http::header::ORIGIN;
 use axum::middleware;
 use axum::middleware::Next;
@@ -62,11 +64,14 @@ fn print_websocket_startup_banner(addr: SocketAddr) {
     let ready_url = colorize(&format!("http://{addr}/readyz"), Style::new().green());
     let health_label = colorize("healthz:", Style::new().dimmed());
     let health_url = colorize(&format!("http://{addr}/healthz"), Style::new().green());
+    let requirement_label = colorize("requirement page:", Style::new().dimmed());
+    let requirement_url = colorize(&format!("http://{addr}/requirements"), Style::new().green());
     let note_label = colorize("note:", Style::new().dimmed());
     eprintln!("{title}");
     eprintln!("  {listening_label} {listen_url}");
     eprintln!("  {ready_label} {ready_url}");
     eprintln!("  {health_label} {health_url}");
+    eprintln!("  {requirement_label} {requirement_url}");
     if addr.ip().is_loopback() {
         eprintln!(
             "  {note_label} binds localhost only (use SSH port-forwarding for remote access)"
@@ -86,20 +91,39 @@ async fn health_check_handler() -> StatusCode {
     StatusCode::OK
 }
 
-async fn reject_requests_with_origin_header(
+async fn reject_cross_origin_browser_requests(
     request: Request<Body>,
     next: Next,
 ) -> Result<Response, StatusCode> {
-    if request.headers().contains_key(ORIGIN) {
+    if !origin_matches_host(request.headers()) {
         warn!(
             method = %request.method(),
             uri = %request.uri(),
-            "rejecting websocket listener request with Origin header"
+            "rejecting websocket listener request with cross-origin Origin header"
         );
         Err(StatusCode::FORBIDDEN)
     } else {
         Ok(next.run(request).await)
     }
+}
+
+fn origin_matches_host(headers: &HeaderMap) -> bool {
+    let Some(origin) = headers.get(ORIGIN) else {
+        return true;
+    };
+    let Ok(origin) = origin.to_str() else {
+        return false;
+    };
+    let Some(host) = headers.get(HOST).and_then(|host| host.to_str().ok()) else {
+        return false;
+    };
+    let Some(origin_authority) = origin
+        .strip_prefix("http://")
+        .or_else(|| origin.strip_prefix("https://"))
+    else {
+        return false;
+    };
+    origin_authority.trim_end_matches('/') == host
 }
 
 async fn websocket_upgrade_handler(
@@ -148,8 +172,10 @@ pub async fn start_websocket_acceptor(
     let router = Router::new()
         .route("/readyz", get(health_check_handler))
         .route("/healthz", get(health_check_handler))
+        .route("/requirements", get(requirement_page))
+        .route("/ws", get(websocket_upgrade_handler))
         .fallback(any(websocket_upgrade_handler))
-        .layer(middleware::from_fn(reject_requests_with_origin_header))
+        .layer(middleware::from_fn(reject_cross_origin_browser_requests))
         .with_state(WebSocketListenerState {
             transport_event_tx,
             auth_policy: Arc::new(auth_policy),

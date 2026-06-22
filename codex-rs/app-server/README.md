@@ -32,7 +32,8 @@ When running with `--listen ws://IP:PORT`, the same listener also serves basic H
 
 - `GET /readyz` returns `200 OK` once the listener is accepting new connections.
 - `GET /healthz` returns `200 OK` when no `Origin` header is present.
-- Any request carrying an `Origin` header is rejected with `403 Forbidden`.
+- `GET /requirements` serves a browser-based requirement outcome page that connects back to the same listener at `/ws`.
+- Browser requests with an `Origin` header must be same-origin with the listener host; cross-origin requests are rejected with `403 Forbidden`.
 
 Websocket transport is currently experimental and unsupported. Do not rely on it for production workloads.
 
