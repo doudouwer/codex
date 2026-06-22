@@ -307,3 +307,29 @@ closest `pyproject.toml`'s `requires-python` field to see what minimum runtime v
 ## Platform Support
 
 Tests and features must support Linux, macOS and Windows unless feature is explicitly OS-specific.
+
+## Cursor Cloud specific instructions
+
+The dominant product here is the Rust `codex` CLI (workspace in `codex-rs/`). The TS/Python SDKs and
+the `codex-cli` npm package are thin wrappers that spawn the compiled `codex` binary.
+
+Environment is pre-provisioned by the snapshot + update script: Rust toolchain (auto-selected from
+`codex-rs/rust-toolchain.toml`, currently 1.95.0), `just`, `cargo-nextest`, and system packages
+(`libssl-dev`, `libcap-dev`, `musl-tools`, `bubblewrap`). The update script runs `cargo fetch` from
+`codex-rs/`.
+
+Non-obvious caveats:
+
+- Toolchain override is path-scoped. Always run `cargo`/`just` from inside `codex-rs/` (the root
+  `justfile` already sets `working-directory := "codex-rs"`). Running `cargo` from the repo root uses
+  the system default toolchain (older) and fails with an `edition2024` error.
+- Build/run the app in dev: `cd codex-rs && cargo build --bin codex` then `./target/debug/codex`
+  (or `just codex` / `just exec ...`). Standard lint/test commands are documented above
+  (`just clippy -p <crate>`, `just test -p <crate>`); the first build of the full workspace takes
+  several minutes.
+- `codex sandbox` and real sandboxed command execution require `bwrap` (bubblewrap) on `PATH`;
+  without it the sandbox panics with "bubblewrap is unavailable". A permissions profile is required,
+  e.g. `-P :workspace`, `-P :read-only`, or `-P :danger-full-access`.
+- Network egress is disabled in this environment (`CODEX_SANDBOX_NETWORK_DISABLED=1`), so live model
+  calls / real agent turns cannot run. Integration tests rely on mock HTTP servers (wiremock); some
+  tests early-exit when they detect the sandbox.
