@@ -1,0 +1,24 @@
+---
+source: tui/src/requirement_view.rs
+expression: terminal.backend()
+---
+"/ R E Q U I R E M E N T / / / / / / / / / / / / / / / / / / / / / / / / / / / / "
+"Objective                                                                       "
+"Ship the requirements outcome view.                                             "
+"                                                                                "
+"Status                                                                          "
+"waiting on decision                                                             "
+"                                                                                "
+"Summary                                                                         "
+"The backend exposes an outcome summary ready for TUI display.                   "
+"                                                                                "
+"Decisions                                                                       "
+"- immediate / pending: Pick the first entry point                               "
+"  Description: Use a slash command for discoverability.                         "
+"  Recommendation: Start with the slash command.                                 "
+"  Options: /requirements (Open the full requirement outcome.); keyboard shortcut"
+"~                                                                               "
+"───────────────────────────────────────────────────────────────────────── 100% ─"
+" ↑/↓ to scroll   pgup/pgdn to page   home/end to jump                           "
+" q to quit                                                                      "
+"                                                                                "

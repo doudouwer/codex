@@ -973,6 +973,99 @@ fn thread_shell_command_response_round_trip() {
 }
 
 #[test]
+fn thread_requirement_response_round_trip() {
+    let response = ThreadRequirementReadResponse {
+        requirement: ThreadRequirement {
+            thread_id: "thr_123".to_string(),
+            objective: Some("ship outcome".to_string()),
+            status: ThreadRequirementStatus::WaitingOnDecision,
+            summary: "Need a deployment choice.".to_string(),
+            decisions: vec![ThreadDecision {
+                id: "plan-1:0".to_string(),
+                thread_id: "thr_123".to_string(),
+                title: "Pick deployment target".to_string(),
+                description: String::new(),
+                urgency: ThreadDecisionUrgency::Deferred,
+                status: ThreadDecisionStatus::Pending,
+                options: vec![ThreadDecisionOption {
+                    id: "opt-1".to_string(),
+                    label: "Staging".to_string(),
+                    description: Some("Deploy to staging first".to_string()),
+                }],
+                recommendation: Some("Staging".to_string()),
+                source_turn_id: Some("turn-1".to_string()),
+                resolved_at: None,
+                resolution: None,
+                selected_option_id: None,
+            }],
+            updated_at: Some(1_700_000_000),
+        },
+    };
+
+    let value = serde_json::to_value(&response).expect("serialize thread requirement response");
+    assert_eq!(
+        value,
+        json!({
+            "requirement": {
+                "threadId": "thr_123",
+                "objective": "ship outcome",
+                "status": "waitingOnDecision",
+                "summary": "Need a deployment choice.",
+                "decisions": [{
+                    "id": "plan-1:0",
+                    "threadId": "thr_123",
+                    "title": "Pick deployment target",
+                    "description": "",
+                    "urgency": "deferred",
+                    "status": "pending",
+                    "options": [{
+                        "id": "opt-1",
+                        "label": "Staging",
+                        "description": "Deploy to staging first"
+                    }],
+                    "recommendation": "Staging",
+                    "sourceTurnId": "turn-1",
+                    "resolvedAt": null,
+                    "resolution": null,
+                    "selectedOptionId": null
+                }],
+                "updatedAt": 1_700_000_000
+            }
+        })
+    );
+
+    let decoded = serde_json::from_value::<ThreadRequirementReadResponse>(value)
+        .expect("deserialize thread requirement response");
+    assert_eq!(decoded, response);
+}
+
+#[test]
+fn thread_decision_resolve_params_round_trip_with_defer_default() {
+    let params = ThreadDecisionResolveParams {
+        thread_id: "thr_123".to_string(),
+        decision_id: "decision-1".to_string(),
+        selected_option_id: None,
+        resolution: Some("Later".to_string()),
+        defer: false,
+    };
+
+    let value = serde_json::to_value(&params).expect("serialize thread decision resolve params");
+    assert_eq!(
+        value,
+        json!({
+            "threadId": "thr_123",
+            "decisionId": "decision-1",
+            "selectedOptionId": null,
+            "resolution": "Later"
+        })
+    );
+
+    let decoded = serde_json::from_value::<ThreadDecisionResolveParams>(value)
+        .expect("deserialize thread decision resolve params");
+    assert_eq!(decoded, params);
+}
+
+#[test]
 fn fs_changed_notification_round_trips() {
     let notification = FsChangedNotification {
         watch_id: "0195ec6b-1d6f-7c2e-8c7a-56f2c4a8b9d1".to_string(),

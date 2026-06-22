@@ -719,6 +719,9 @@ impl App {
             AppEvent::OpenThreadGoalMenu { thread_id } => {
                 self.open_thread_goal_menu(app_server, thread_id).await;
             }
+            AppEvent::OpenRequirementView { thread_id } => {
+                self.open_requirement_view(tui, app_server, thread_id).await;
+            }
             AppEvent::OpenThreadGoalEditor { thread_id } => {
                 self.open_thread_goal_editor(app_server, thread_id).await;
             }

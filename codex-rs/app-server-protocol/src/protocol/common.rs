@@ -545,6 +545,21 @@ client_request_definitions! {
         serialization: thread_id(params.thread_id),
         response: v2::ThreadGoalClearResponse,
     },
+    ThreadRequirementRead => "thread/requirement/read" {
+        params: v2::ThreadRequirementReadParams,
+        serialization: thread_id(params.thread_id),
+        response: v2::ThreadRequirementReadResponse,
+    },
+    ThreadDecisionList => "thread/decision/list" {
+        params: v2::ThreadDecisionListParams,
+        serialization: thread_id(params.thread_id),
+        response: v2::ThreadDecisionListResponse,
+    },
+    ThreadDecisionResolve => "thread/decision/resolve" {
+        params: v2::ThreadDecisionResolveParams,
+        serialization: thread_id(params.thread_id),
+        response: v2::ThreadDecisionResolveResponse,
+    },
     ThreadMetadataUpdate => "thread/metadata/update" {
         params: v2::ThreadMetadataUpdateParams,
         serialization: thread_id(params.thread_id),
@@ -1968,6 +1983,51 @@ mod tests {
             thread_goal_set.serialization_scope(),
             Some(ClientRequestSerializationScope::Thread {
                 thread_id: "goal-thread".to_string()
+            })
+        );
+
+        let requirement_read = ClientRequest::ThreadRequirementRead {
+            request_id: request_id(),
+            params: v2::ThreadRequirementReadParams {
+                thread_id: "requirement-thread".to_string(),
+            },
+        };
+        assert_eq!(
+            requirement_read.serialization_scope(),
+            Some(ClientRequestSerializationScope::Thread {
+                thread_id: "requirement-thread".to_string()
+            })
+        );
+
+        let decision_list = ClientRequest::ThreadDecisionList {
+            request_id: request_id(),
+            params: v2::ThreadDecisionListParams {
+                thread_id: "requirement-thread".to_string(),
+                status: Some(v2::ThreadDecisionStatus::Pending),
+                urgency: None,
+            },
+        };
+        assert_eq!(
+            decision_list.serialization_scope(),
+            Some(ClientRequestSerializationScope::Thread {
+                thread_id: "requirement-thread".to_string()
+            })
+        );
+
+        let decision_resolve = ClientRequest::ThreadDecisionResolve {
+            request_id: request_id(),
+            params: v2::ThreadDecisionResolveParams {
+                thread_id: "requirement-thread".to_string(),
+                decision_id: "plan-1:0".to_string(),
+                selected_option_id: None,
+                resolution: None,
+                defer: true,
+            },
+        };
+        assert_eq!(
+            decision_resolve.serialization_scope(),
+            Some(ClientRequestSerializationScope::Thread {
+                thread_id: "requirement-thread".to_string()
             })
         );
 

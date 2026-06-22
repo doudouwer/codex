@@ -294,6 +294,18 @@ impl ChatWidget {
                     );
                 }
             }
+            SlashCommand::Requirements => {
+                if let Some(thread_id) = self.thread_id {
+                    self.app_event_tx
+                        .send(AppEvent::OpenRequirementView { thread_id });
+                    self.append_message_history_entry("/requirements".to_string());
+                } else {
+                    self.add_error_message(
+                        "Session is still starting; try /requirements again in a moment."
+                            .to_string(),
+                    );
+                }
+            }
             SlashCommand::Side | SlashCommand::Btw => {
                 self.request_empty_side_conversation(cmd);
             }
@@ -1073,6 +1085,7 @@ impl ChatWidget {
             | SlashCommand::Personality
             | SlashCommand::Plan
             | SlashCommand::Goal
+            | SlashCommand::Requirements
             | SlashCommand::Side
             | SlashCommand::Btw
             | SlashCommand::Keymap
