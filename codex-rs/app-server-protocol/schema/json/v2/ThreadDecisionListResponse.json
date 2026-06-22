@@ -1,0 +1,123 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ThreadDecision": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/definitions/ThreadDecisionOption"
+          },
+          "type": "array"
+        },
+        "recommendation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolvedAt": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "selectedOptionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceTurnId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/definitions/ThreadDecisionStatus"
+        },
+        "threadId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "urgency": {
+          "$ref": "#/definitions/ThreadDecisionUrgency"
+        }
+      },
+      "required": [
+        "description",
+        "id",
+        "options",
+        "status",
+        "threadId",
+        "title",
+        "urgency"
+      ],
+      "type": "object"
+    },
+    "ThreadDecisionOption": {
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "type": "object"
+    },
+    "ThreadDecisionStatus": {
+      "enum": [
+        "pending",
+        "resolved",
+        "deferred"
+      ],
+      "type": "string"
+    },
+    "ThreadDecisionUrgency": {
+      "enum": [
+        "immediate",
+        "deferred"
+      ],
+      "type": "string"
+    }
+  },
+  "properties": {
+    "data": {
+      "items": {
+        "$ref": "#/definitions/ThreadDecision"
+      },
+      "type": "array"
+    }
+  },
+  "required": [
+    "data"
+  ],
+  "title": "ThreadDecisionListResponse",
+  "type": "object"
+}

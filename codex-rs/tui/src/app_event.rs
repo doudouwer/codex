@@ -277,6 +277,11 @@ pub(crate) enum AppEvent {
         thread_id: ThreadId,
     },
 
+    /// Open the current thread requirement outcome view.
+    OpenRequirementView {
+        thread_id: ThreadId,
+    },
+
     /// Open an editor for the current thread goal objective.
     OpenThreadGoalEditor {
         thread_id: Option<ThreadId>,

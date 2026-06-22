@@ -1,0 +1,50 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "definitions": {
+    "ThreadDecisionStatus": {
+      "enum": [
+        "pending",
+        "resolved",
+        "deferred"
+      ],
+      "type": "string"
+    },
+    "ThreadDecisionUrgency": {
+      "enum": [
+        "immediate",
+        "deferred"
+      ],
+      "type": "string"
+    }
+  },
+  "properties": {
+    "status": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ThreadDecisionStatus"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "threadId": {
+      "type": "string"
+    },
+    "urgency": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/ThreadDecisionUrgency"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": [
+    "threadId"
+  ],
+  "title": "ThreadDecisionListParams",
+  "type": "object"
+}

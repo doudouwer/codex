@@ -1484,6 +1484,78 @@
             },
             "method": {
               "enum": [
+                "thread/requirement/read"
+              ],
+              "title": "Thread/requirement/readRequestMethod",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/definitions/ThreadRequirementReadParams"
+            }
+          },
+          "required": [
+            "id",
+            "method",
+            "params"
+          ],
+          "title": "Thread/requirement/readRequest",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/RequestId"
+            },
+            "method": {
+              "enum": [
+                "thread/decision/list"
+              ],
+              "title": "Thread/decision/listRequestMethod",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/definitions/ThreadDecisionListParams"
+            }
+          },
+          "required": [
+            "id",
+            "method",
+            "params"
+          ],
+          "title": "Thread/decision/listRequest",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/RequestId"
+            },
+            "method": {
+              "enum": [
+                "thread/decision/resolve"
+              ],
+              "title": "Thread/decision/resolveRequestMethod",
+              "type": "string"
+            },
+            "params": {
+              "$ref": "#/definitions/ThreadDecisionResolveParams"
+            }
+          },
+          "required": [
+            "id",
+            "method",
+            "params"
+          ],
+          "title": "Thread/decision/resolveRequest",
+          "type": "object"
+        },
+        {
+          "properties": {
+            "id": {
+              "$ref": "#/definitions/RequestId"
+            },
+            "method": {
+              "enum": [
                 "thread/metadata/update"
               ],
               "title": "Thread/metadata/updateRequestMethod",
@@ -14733,6 +14805,205 @@
       "title": "ThreadCompactStartResponse",
       "type": "object"
     },
+    "ThreadDecision": {
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "id": {
+          "type": "string"
+        },
+        "options": {
+          "items": {
+            "$ref": "#/definitions/ThreadDecisionOption"
+          },
+          "type": "array"
+        },
+        "recommendation": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolution": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "resolvedAt": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "selectedOptionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sourceTurnId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/definitions/ThreadDecisionStatus"
+        },
+        "threadId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "urgency": {
+          "$ref": "#/definitions/ThreadDecisionUrgency"
+        }
+      },
+      "required": [
+        "description",
+        "id",
+        "options",
+        "status",
+        "threadId",
+        "title",
+        "urgency"
+      ],
+      "type": "object"
+    },
+    "ThreadDecisionListParams": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "status": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ThreadDecisionStatus"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "threadId": {
+          "type": "string"
+        },
+        "urgency": {
+          "anyOf": [
+            {
+              "$ref": "#/definitions/ThreadDecisionUrgency"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "threadId"
+      ],
+      "title": "ThreadDecisionListParams",
+      "type": "object"
+    },
+    "ThreadDecisionListResponse": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "data": {
+          "items": {
+            "$ref": "#/definitions/ThreadDecision"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "data"
+      ],
+      "title": "ThreadDecisionListResponse",
+      "type": "object"
+    },
+    "ThreadDecisionOption": {
+      "properties": {
+        "description": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "id": {
+          "type": "string"
+        },
+        "label": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "label"
+      ],
+      "type": "object"
+    },
+    "ThreadDecisionResolveParams": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "decisionId": {
+          "type": "string"
+        },
+        "defer": {
+          "type": "boolean"
+        },
+        "resolution": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selectedOptionId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "threadId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "decisionId",
+        "threadId"
+      ],
+      "title": "ThreadDecisionResolveParams",
+      "type": "object"
+    },
+    "ThreadDecisionResolveResponse": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "decision": {
+          "$ref": "#/definitions/ThreadDecision"
+        }
+      },
+      "required": [
+        "decision"
+      ],
+      "title": "ThreadDecisionResolveResponse",
+      "type": "object"
+    },
+    "ThreadDecisionStatus": {
+      "enum": [
+        "pending",
+        "resolved",
+        "deferred"
+      ],
+      "type": "string"
+    },
+    "ThreadDecisionUrgency": {
+      "enum": [
+        "immediate",
+        "deferred"
+      ],
+      "type": "string"
+    },
     "ThreadDeleteParams": {
       "$schema": "http://json-schema.org/draft-07/schema#",
       "properties": {
@@ -16446,6 +16717,82 @@
       ],
       "title": "ThreadRealtimeTranscriptDoneNotification",
       "type": "object"
+    },
+    "ThreadRequirement": {
+      "properties": {
+        "decisions": {
+          "items": {
+            "$ref": "#/definitions/ThreadDecision"
+          },
+          "type": "array"
+        },
+        "objective": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "status": {
+          "$ref": "#/definitions/ThreadRequirementStatus"
+        },
+        "summary": {
+          "type": "string"
+        },
+        "threadId": {
+          "type": "string"
+        },
+        "updatedAt": {
+          "format": "int64",
+          "type": [
+            "integer",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "decisions",
+        "status",
+        "summary",
+        "threadId"
+      ],
+      "type": "object"
+    },
+    "ThreadRequirementReadParams": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "threadId": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "threadId"
+      ],
+      "title": "ThreadRequirementReadParams",
+      "type": "object"
+    },
+    "ThreadRequirementReadResponse": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "properties": {
+        "requirement": {
+          "$ref": "#/definitions/ThreadRequirement"
+        }
+      },
+      "required": [
+        "requirement"
+      ],
+      "title": "ThreadRequirementReadResponse",
+      "type": "object"
+    },
+    "ThreadRequirementStatus": {
+      "enum": [
+        "notStarted",
+        "running",
+        "waitingOnDecision",
+        "complete",
+        "failed",
+        "unknown"
+      ],
+      "type": "string"
     },
     "ThreadResumeInitialTurnsPageParams": {
       "properties": {

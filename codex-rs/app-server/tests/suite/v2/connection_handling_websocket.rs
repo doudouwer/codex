@@ -119,6 +119,12 @@ async fn websocket_transport_serves_health_endpoints_on_same_listener() -> Resul
     let healthz = http_get(&client, bind_addr, "/healthz").await?;
     assert_eq!(healthz.status(), StatusCode::OK);
 
+    let requirement_page = http_get(&client, bind_addr, "/requirements").await?;
+    assert_eq!(requirement_page.status(), StatusCode::OK);
+    let requirement_page = requirement_page.text().await?;
+    assert!(requirement_page.contains("Codex Requirement View"));
+    assert!(requirement_page.contains("thread/requirement/read"));
+
     let mut ws = connect_websocket(bind_addr).await?;
     send_initialize_request(&mut ws, /*id*/ 1, "ws_health_client").await?;
     let init = read_response_for_id(&mut ws, /*id*/ 1).await?;
@@ -132,7 +138,7 @@ async fn websocket_transport_serves_health_endpoints_on_same_listener() -> Resul
 }
 
 #[tokio::test]
-async fn websocket_transport_rejects_browser_origin_without_auth() -> Result<()> {
+async fn websocket_transport_accepts_same_origin_browser_websocket() -> Result<()> {
     let server = create_mock_responses_server_sequence_unchecked(Vec::new()).await;
     let codex_home = TempDir::new()?;
     create_config_toml(codex_home.path(), &server.uri(), "never")?;
@@ -144,6 +150,12 @@ async fn websocket_transport_rejects_browser_origin_without_auth() -> Result<()>
     let init = read_response_for_id(&mut ws, /*id*/ 1).await?;
     assert_eq!(init.id, RequestId::Integer(1));
     drop(ws);
+
+    let mut browser_ws = connect_same_origin_browser_websocket(bind_addr).await?;
+    send_initialize_request(&mut browser_ws, /*id*/ 2, "ws_browser_client").await?;
+    let browser_init = read_response_for_id(&mut browser_ws, /*id*/ 2).await?;
+    assert_eq!(browser_init.id, RequestId::Integer(2));
+    drop(browser_ws);
 
     assert_websocket_connect_rejected_with_headers(
         bind_addr,
@@ -456,6 +468,29 @@ pub(super) async fn spawn_websocket_server_with_args(
 
 pub(super) async fn connect_websocket(bind_addr: SocketAddr) -> Result<WsClient> {
     connect_websocket_with_bearer(bind_addr, /*bearer_token*/ None).await
+}
+
+async fn connect_same_origin_browser_websocket(bind_addr: SocketAddr) -> Result<WsClient> {
+    let connectable_bind_addr = connectable_bind_addr(bind_addr);
+    let url = format!("ws://{connectable_bind_addr}/ws");
+    let origin = format!("http://{connectable_bind_addr}");
+    let request = websocket_request(
+        url.as_str(),
+        /*bearer_token*/ None,
+        Some(origin.as_str()),
+    )?;
+    let deadline = Instant::now() + DEFAULT_READ_TIMEOUT;
+    loop {
+        match connect_async(request.clone()).await {
+            Ok((stream, _response)) => return Ok(stream),
+            Err(err) => {
+                if Instant::now() >= deadline {
+                    bail!("failed to connect same-origin websocket to {url}: {err}");
+                }
+                sleep(Duration::from_millis(50)).await;
+            }
+        }
+    }
 }
 
 pub(super) async fn connect_websocket_with_bearer(

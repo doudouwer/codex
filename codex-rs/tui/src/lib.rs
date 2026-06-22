@@ -155,6 +155,7 @@ mod pager_overlay;
 mod permission_compat;
 pub(crate) mod public_widgets;
 mod render;
+mod requirement_view;
 mod resize_reflow_cap;
 mod resume_picker;
 mod selection_list;

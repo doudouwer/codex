@@ -81,6 +81,8 @@ use codex_app_server_protocol::ThreadMetadataUpdateParams;
 use codex_app_server_protocol::ThreadMetadataUpdateResponse;
 use codex_app_server_protocol::ThreadReadParams;
 use codex_app_server_protocol::ThreadReadResponse;
+use codex_app_server_protocol::ThreadRequirementReadParams;
+use codex_app_server_protocol::ThreadRequirementReadResponse;
 use codex_app_server_protocol::ThreadResumeParams;
 use codex_app_server_protocol::ThreadResumeResponse;
 use codex_app_server_protocol::ThreadRollbackParams;
@@ -946,6 +948,22 @@ impl AppServerSession {
             })
             .await
             .wrap_err("thread/goal/clear failed in TUI")
+    }
+
+    pub(crate) async fn thread_requirement_read(
+        &mut self,
+        thread_id: ThreadId,
+    ) -> Result<ThreadRequirementReadResponse> {
+        let request_id = self.next_request_id();
+        self.client
+            .request_typed(ClientRequest::ThreadRequirementRead {
+                request_id,
+                params: ThreadRequirementReadParams {
+                    thread_id: thread_id.to_string(),
+                },
+            })
+            .await
+            .wrap_err("thread/requirement/read failed in TUI")
     }
 
     pub(crate) async fn logout_account(&mut self) -> Result<()> {

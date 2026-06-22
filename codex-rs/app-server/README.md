@@ -32,7 +32,8 @@ When running with `--listen ws://IP:PORT`, the same listener also serves basic H
 
 - `GET /readyz` returns `200 OK` once the listener is accepting new connections.
 - `GET /healthz` returns `200 OK` when no `Origin` header is present.
-- Any request carrying an `Origin` header is rejected with `403 Forbidden`.
+- `GET /requirements` serves a browser-based requirement outcome page that connects back to the same listener at `/ws`.
+- Browser requests with an `Origin` header must be same-origin with the listener host; cross-origin requests are rejected with `403 Forbidden`.
 
 Websocket transport is currently experimental and unsupported. Do not rely on it for production workloads.
 
@@ -153,6 +154,9 @@ Example with notification opt-out:
 - `thread/goal/set` — create or update the single persisted goal for a materialized thread; returns the current goal and emits `thread/goal/updated`.
 - `thread/goal/get` — fetch the current persisted goal for a materialized thread; returns `goal: null` when no goal exists.
 - `thread/goal/clear` — clear the current persisted goal for a materialized thread; returns whether a goal was removed and emits `thread/goal/cleared` when state changes.
+- `thread/requirement/read` — read an outcome-oriented requirement view for a thread. The response exposes the objective, current summary, status, and decisions while hiding implementation details such as `CommandExecution` and `FileChange` items. In the first phase, `objective` comes from the thread goal when present, `summary` comes from the latest agent message, and decisions are derived from plan items rather than stored durably.
+- `thread/decision/list` — list the requirement decisions derived for a thread, optionally filtering by `status` and `urgency`. First-phase decisions are reconstructed from current thread history and are not yet durable.
+- `thread/decision/resolve` — return a resolved or deferred decision projection for a thread decision id. First-phase resolution validates the thread id and decision id but does not persist the result.
 - `thread/goal/updated` — notification emitted whenever a thread goal changes; includes the full current goal.
 - `thread/goal/cleared` — notification emitted whenever a thread goal is removed.
 - `thread/settings/updated` — experimental notification emitted to subscribed clients when a loaded thread’s effective next-turn settings change; includes `threadId` and the full `threadSettings`.

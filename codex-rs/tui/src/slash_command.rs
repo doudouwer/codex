@@ -40,6 +40,8 @@ pub enum SlashCommand {
     Compact,
     Plan,
     Goal,
+    #[strum(to_string = "requirements", serialize = "requirement")]
+    Requirements,
     Agent,
     Side,
     Btw,
@@ -120,6 +122,7 @@ impl SlashCommand {
             SlashCommand::Personality => "choose a communication style for Codex",
             SlashCommand::Plan => "switch to Plan mode",
             SlashCommand::Goal => "set or view the goal for a long-running task",
+            SlashCommand::Requirements => "view the requirement outcome",
             SlashCommand::Agent | SlashCommand::MultiAgents => "switch the active agent thread",
             SlashCommand::Side | SlashCommand::Btw => {
                 "start a side conversation in an ephemeral fork"
@@ -224,6 +227,7 @@ impl SlashCommand {
             | SlashCommand::Stop
             | SlashCommand::App
             | SlashCommand::Goal
+            | SlashCommand::Requirements
             | SlashCommand::Mcp
             | SlashCommand::Apps
             | SlashCommand::Plugins
@@ -303,6 +307,15 @@ mod tests {
         assert_eq!(
             SlashCommand::from_str("approve"),
             Ok(SlashCommand::AutoReview)
+        );
+    }
+
+    #[test]
+    fn requirement_alias_parses_to_requirements_command() {
+        assert_eq!(SlashCommand::Requirements.command(), "requirements");
+        assert_eq!(
+            SlashCommand::from_str("requirement"),
+            Ok(SlashCommand::Requirements)
         );
     }
 }

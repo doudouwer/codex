@@ -38,6 +38,7 @@ use crate::request_processors::RemoteControlRequestProcessor;
 use crate::request_processors::SearchRequestProcessor;
 use crate::request_processors::ThreadGoalRequestProcessor;
 use crate::request_processors::ThreadRequestProcessor;
+use crate::request_processors::ThreadRequirementRequestProcessor;
 use crate::request_processors::TurnRequestProcessor;
 use crate::request_processors::WindowsSandboxRequestProcessor;
 use crate::request_serialization::QueuedInitializedRequest;
@@ -206,6 +207,7 @@ pub(crate) struct MessageProcessor {
     search_processor: SearchRequestProcessor,
     thread_goal_processor: ThreadGoalRequestProcessor,
     thread_processor: ThreadRequestProcessor,
+    thread_requirement_processor: ThreadRequirementRequestProcessor,
     turn_processor: TurnRequestProcessor,
     windows_sandbox_processor: WindowsSandboxRequestProcessor,
     request_serialization_queues: RequestSerializationQueues,
@@ -496,6 +498,13 @@ impl MessageProcessor {
             log_db,
             Arc::clone(&skills_watcher),
         );
+        let thread_requirement_processor = ThreadRequirementRequestProcessor::new(
+            Arc::clone(&thread_manager),
+            Arc::clone(&config),
+            Arc::clone(&thread_store),
+            state_db.clone(),
+            Arc::clone(&goal_service),
+        );
         let turn_processor = TurnRequestProcessor::new(
             auth_manager.clone(),
             Arc::clone(&thread_manager),
@@ -575,6 +584,7 @@ impl MessageProcessor {
             search_processor,
             thread_goal_processor,
             thread_processor,
+            thread_requirement_processor,
             turn_processor,
             windows_sandbox_processor,
             request_serialization_queues: RequestSerializationQueues::default(),
@@ -1164,6 +1174,21 @@ impl MessageProcessor {
             ClientRequest::ThreadGoalClear { params, .. } => {
                 self.thread_goal_processor
                     .thread_goal_clear(request_id.clone(), params)
+                    .await
+            }
+            ClientRequest::ThreadRequirementRead { params, .. } => {
+                self.thread_requirement_processor
+                    .thread_requirement_read(params)
+                    .await
+            }
+            ClientRequest::ThreadDecisionList { params, .. } => {
+                self.thread_requirement_processor
+                    .thread_decision_list(params)
+                    .await
+            }
+            ClientRequest::ThreadDecisionResolve { params, .. } => {
+                self.thread_requirement_processor
+                    .thread_decision_resolve(params)
                     .await
             }
             ClientRequest::ThreadMetadataUpdate { params, .. } => {

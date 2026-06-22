@@ -28,6 +28,7 @@ mod stdio;
 mod unix_socket;
 #[cfg(test)]
 mod unix_socket_tests;
+mod web_client;
 mod websocket;
 
 pub use remote_control::REMOTE_CONTROL_DISABLED_ENV_VAR;
