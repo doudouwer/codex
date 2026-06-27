@@ -124,6 +124,10 @@ async fn websocket_transport_serves_health_endpoints_on_same_listener() -> Resul
     let requirement_page = requirement_page.text().await?;
     assert!(requirement_page.contains("Codex Requirement View"));
     assert!(requirement_page.contains("thread/requirement/read"));
+    assert!(requirement_page.contains("thread/turns/list"));
+    assert!(requirement_page.contains("turn/start"));
+    assert!(requirement_page.contains("Conversation panels"));
+    assert!(requirement_page.contains("Decision reply"));
 
     let mut ws = connect_websocket(bind_addr).await?;
     send_initialize_request(&mut ws, /*id*/ 1, "ws_health_client").await?;
