@@ -159,7 +159,8 @@ const REQUIREMENT_PAGE_HTML: &str = r##"<!doctype html>
         try {
           setConnection("Connected");
           await request("initialize", {
-            clientInfo: { name: "codex_requirement_page", title: "Codex Requirement Page", version: "0.1.0" }
+            clientInfo: { name: "codex_requirement_page", title: "Codex Requirement Page", version: "0.1.0" },
+            capabilities: { experimentalApi: true }
           });
           await loadThreads();
           const initialThread = new URLSearchParams(location.search).get("threadId");
